@@ -7,7 +7,7 @@ using Opc.Hda;
 using System.Data;
 using System.Net;
 
-namespace OpcHda2TcpLib
+namespace OpcHda2Tcp
 {
 	public class OPCHDAClient
 	{

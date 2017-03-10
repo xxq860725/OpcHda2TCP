@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
-namespace OpcHda2TcpLib
+namespace OpcHda2Tcp
 {
 	/// <summary>
 	/// TcpListener实现异步TCP服务器
@@ -20,7 +20,7 @@ namespace OpcHda2TcpLib
 		/// <summary>
 		/// 当前的连接的客户端数
 		/// </summary>
-		private int _clientCount;
+		public int ClientCount { get; private set; }
 
 		/// <summary>
 		/// 服务器使用的异步TcpListener
@@ -30,7 +30,7 @@ namespace OpcHda2TcpLib
 		/// <summary>
 		/// 客户端会话列表
 		/// </summary>
-		private List<Object> _clients;
+		private  List<Object> _clients;
 
 		private bool disposed = false;
 
@@ -159,6 +159,7 @@ namespace OpcHda2TcpLib
 				lock (_clients)
 				{
 					_clients.Add(state);
+					ClientCount++;
 					RaiseClientConnected(state);
 				}
 
@@ -196,9 +197,11 @@ namespace OpcHda2TcpLib
 					// connection has been closed
 					lock (_clients)
 					{
-						_clients.Remove(state);
+						//_clients.Remove(state);
+						Close(state);
+						//ClientCount--;
 						//触发客户端连接断开事件
-						RaiseClientDisconnected(state);
+						//RaiseClientDisconnected(state);
 						return;
 					}
 				}
@@ -210,6 +213,7 @@ namespace OpcHda2TcpLib
 				RaiseDataReceived(state);
 				// continue listening for tcp datagram packets
 				stream.BeginRead(state.Buffer, 0, state.Buffer.Length, HandleDataReceived, state);
+
 			}
 		}
 
@@ -386,10 +390,12 @@ namespace OpcHda2TcpLib
 		{
 			if (state != null)
 			{
+				
 				state.Close();
 				_clients.Remove(state);
-				_clientCount--;
+				ClientCount--;
 				//TODO 触发关闭事件
+				RaiseClientDisconnected(state);
 			}
 		}
 
@@ -402,7 +408,7 @@ namespace OpcHda2TcpLib
 			{
 				Close(client);
 			}
-			_clientCount = 0;
+			ClientCount = 0;
 			_clients.Clear();
 		}
 		#endregion

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-namespace OpcHda2TcpLib
+namespace OpcHda2Tcp
 {
 	/// <summary>
 	/// 异步TcpListener TCP服务器事件参数类 

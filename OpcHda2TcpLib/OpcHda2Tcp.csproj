@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpcHda2TcpLib</RootNamespace>
-    <AssemblyName>OpcHda2TcpLib</AssemblyName>
+    <AssemblyName>OpcHda2Tcp</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncEventArgs.cs" />
+    <Compile Include="AsyncTCPClient.cs" />
     <Compile Include="AsyncTCPServer.cs" />
     <Compile Include="OpcHdaClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

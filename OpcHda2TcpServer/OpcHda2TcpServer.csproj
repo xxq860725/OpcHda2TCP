@@ -45,9 +45,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OpcHda2TcpLib\OpcHda2TcpLib.csproj">
+    <ProjectReference Include="..\OpcHda2TcpLib\OpcHda2Tcp.csproj">
       <Project>{87C9B988-1230-4FD4-8393-F0860FBCE565}</Project>
-      <Name>OpcHda2TcpLib</Name>
+      <Name>OpcHda2Tcp</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

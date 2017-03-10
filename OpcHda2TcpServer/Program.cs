@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using OpcHda2TcpLib;
+using OpcHda2Tcp;
 using System.Net;
+using System.IO;
 
 namespace OpcHda2TcpServer
 {
@@ -20,6 +21,9 @@ namespace OpcHda2TcpServer
 			myTcpServer.DataReceived += MyTcpServer_DataReceived;
 
 			myTcpServer.CompletedSend += MyTcpServer_CompletedSend;
+
+			myTcpServer.ClientDisconnected += MyTcpServer_ClientDisconnected;
+			
 			#endregion
 
 			myTcpServer.Start();
@@ -33,6 +37,11 @@ namespace OpcHda2TcpServer
 			Console.WriteLine("服务器已经停止，回车后本程序即可退出.....");
 			Console.ReadLine();
 		}
+		private static void MyTcpServer_ClientDisconnected(object sender, AsyncEventArgs e)
+		{
+			Console.WriteLine(  "客户端断开连接，当前连接数："+myTcpServer.ClientCount);
+		}
+
 		/// <summary>
 		/// 接收到数据事件
 		/// </summary>
@@ -43,17 +52,35 @@ namespace OpcHda2TcpServer
 			TCPClientState state = e._state;
 			string a = Encoding.UTF8.GetString(state.Buffer);
 			a = a.Trim(new char[] { '\0' });
-			if (a.Substring(a.Length - 2, 2) == "\r\n")
-			{
-				a = a.Substring(0, a.Length - 2);
-				Console.WriteLine("接收到:" + state.TcpClient.Client.RemoteEndPoint.ToString() + "\t" + a);
-			}
+			//if (a.Substring(a.Length - 2, 2) == "\r\n")
+			//{
+			//	a = a.Substring(0, a.Length - 2);
+			Console.WriteLine("接收到:" + state.TcpClient.Client.RemoteEndPoint.ToString() + "\t" + a);
+			//}
 			//分析命令
 
 			//获取数据
 
 			//发送数据
-			
+			FileStream fs = new FileStream(".\\123.txt", FileMode.Open);
+			int d = fs.ReadByte();
+			List<byte> data = new List<byte> { };
+			while (d!=-1)
+			{
+				data.Add((byte)d);
+				d= fs.ReadByte();
+			}
+			fs.Close();
+			byte[] length = System.BitConverter.GetBytes(data.Count);
+			byte[] header = new byte[48];
+			System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+			byte[] hash= md5.ComputeHash(data.ToArray());
+			System.Buffer.BlockCopy(length, 0, header, 0, 4);
+			System.Buffer.BlockCopy(hash, 0, header, 4, 16);
+			//发送头包
+			sendDatatoClient(state, header);
+			//发送数据
+			sendDatatoClient(state, data.ToArray());
 		}
 
 		/// <summary>
@@ -63,7 +90,7 @@ namespace OpcHda2TcpServer
 		/// <param name="e"></param>
 		private static void MyTcpServer_ClientConnected(object sender, AsyncEventArgs e)
 		{
-			
+			Console.WriteLine("新的客户端加入，当前连接数：{0}", myTcpServer.ClientCount);
 		}
 
 		/// <summary>
@@ -84,7 +111,7 @@ namespace OpcHda2TcpServer
 		/// </summary>
 		/// <param name="state"></param>
 		/// <param name="data"></param>
-		private static void sendDatetoClient(TCPClientState state,byte[] data )
+		private static void sendDatatoClient(TCPClientState state,byte[] data )
 		{
 			myTcpServer.Send(state, data);
 		}

@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpcHda2TcpServer", "OpcHda2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpcHda2TcpClient", "OpcHda2TcpClient\OpcHda2TcpClient.csproj", "{08991983-682D-4BB5-A7D7-7C1CF953CEDE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpcHda2TcpLib", "OpcHda2TcpLib\OpcHda2TcpLib.csproj", "{87C9B988-1230-4FD4-8393-F0860FBCE565}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpcHda2Tcp", "OpcHda2TcpLib\OpcHda2Tcp.csproj", "{87C9B988-1230-4FD4-8393-F0860FBCE565}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
