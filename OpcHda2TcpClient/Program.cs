@@ -16,6 +16,7 @@ namespace OpcHda2TcpClient
 		static void Main(string[] args)
 		{
 			AsyncTCPClient myClient = new AsyncTCPClient("127.0.0.1", 3000, 64 * 1024);
+			myClient.AsyncReadcompleted += MyClient_AsyncReadcompleted;
 			bool isConnected=myClient.Connect();
 			if (isConnected)
 			{
@@ -23,11 +24,17 @@ namespace OpcHda2TcpClient
 				myClient.SyncSend("111222333444555666777888999000");
 				//读取服务器返回的包头
 				myClient.ReadHeader();
-				//
+				//读取返回的数据
 				myClient.AsyncRead();
 			}
 			Console.ReadLine();
 			myClient.Close();
+		}
+
+		private static void MyClient_AsyncReadcompleted(object sender, AsyncEventArgs e)
+		{
+			Console.WriteLine("收到读取完毕事件！");
+			Console.WriteLine("收到数据长度:{0}",e._msg.Length);
 		}
 	}
 }

@@ -145,15 +145,21 @@ namespace OpcHda2Tcp
 			byte[] buff = new byte[recv];
 			System.Buffer.BlockCopy(Buffer, 0, buff,0,recv);
 			RecivedData.AddRange(buff);
-			Console.WriteLine("RecivedData Count:{0}", RecivedData.Count);
+			//Console.WriteLine("RecivedData Count:{0}", RecivedData.Count);
 			if (RecivedData.Count >= _dataLength)
 			{
 				Console.WriteLine("读取完成！");
+				AsyncReadcompleted?.Invoke(this, new AsyncEventArgs(Encoding.UTF8.GetString(RecivedData.ToArray())));
 			}
 			else
 			{
 				stream.BeginRead(Buffer, 0, Buffer.Length, asyncread, client);
 			}			
 		}
+
+		/// <summary>
+		/// 异步读取到所有数据事件
+		/// </summary>
+		public event EventHandler<AsyncEventArgs> AsyncReadcompleted;
 	}
 }
