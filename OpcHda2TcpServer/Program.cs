@@ -5,6 +5,9 @@ using System.Text;
 using OpcHda2Tcp;
 using System.Net;
 using System.IO;
+using System.Data;
+using System.Web.Script.Serialization;
+using System.IO.Compression;
 
 namespace OpcHda2TcpServer
 {
@@ -50,39 +53,29 @@ namespace OpcHda2TcpServer
 		private static void MyTcpServer_DataReceived(object sender, AsyncEventArgs e)
 		{
 			TCPClientState state = e._state;
-			string a = Encoding.UTF8.GetString(state.Buffer);
-			a = a.Trim(new char[] { '\0' });
-			//if (a.Substring(a.Length - 2, 2) == "\r\n")
-			//{
-			//	a = a.Substring(0, a.Length - 2);
-			Console.WriteLine("接收到:" + state.TcpClient.Client.RemoteEndPoint.ToString() + "\t" + a);
-			//}
+			string clientCmdString = Encoding.UTF8.GetString(state.Buffer);
+			clientCmdString = clientCmdString.Trim(new char[] { '\0' });
+			Console.WriteLine("接收到:" + state.TcpClient.Client.RemoteEndPoint.ToString() + "\t" + clientCmdString);
 			//分析命令
-
+			string starttime, endtime, step;
+			List<string> tags;
+			analisisCmd(clientCmdString, out starttime, out endtime, out step, out tags);
 			//获取数据
-
+			byte[] data = readDataFromOpc(starttime, endtime, step, tags);
 			//发送数据
-			FileStream fs = new FileStream(".\\123.txt", FileMode.Open);
-			int d = fs.ReadByte();
-			List<byte> data = new List<byte> { };
-			while (d!=-1)
-			{
-				data.Add((byte)d);
-				d= fs.ReadByte();
-			}
-			fs.Close();
-			byte[] length = System.BitConverter.GetBytes(data.Count);
+			//准备头包数据
+			byte[] length = System.BitConverter.GetBytes(data.Length);
 			byte[] header = new byte[48];
 			System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
-			byte[] hash= md5.ComputeHash(data.ToArray());
+			byte[] hash= md5.ComputeHash(data);
 			System.Buffer.BlockCopy(length, 0, header, 0, 4);
 			System.Buffer.BlockCopy(hash, 0, header, 4, 16);
 			//发送头包
 			sendDatatoClient(state, header);
 			//发送数据
 			sendDatatoClient(state, data.ToArray());
+			Console.WriteLine("发送数据：{0}", data.Length);
 		}
-
 		/// <summary>
 		/// client 连接建立事件
 		/// </summary>
@@ -116,9 +109,122 @@ namespace OpcHda2TcpServer
 			myTcpServer.Send(state, data);
 		}
 
-		private static byte[] readDataFromOpc()
+		/// <summary>
+		/// 分析命令
+		/// </summary>
+		/// <param name="cmd"></param>
+		/// <param name="starttime"></param>
+		/// <param name="endtime"></param>
+		/// <param name="step"></param>
+		/// <param name="tags"></param>
+		private static void analisisCmd(string cmd,out string starttime, out string endtime, out string step, out List<string> tags)
 		{
-			return new byte[10];
+			starttime = endtime=step=string.Empty;
+			tags = new List<string> { };
+			if (cmd.Split('%').Length != 4)
+			{
+				Console.WriteLine("命令错误！");
+				return;
+			}
+			starttime = cmd.Split('%')[0];
+			endtime= cmd.Split('%')[1];
+			step= cmd.Split('%')[2];
+			tags.AddRange(cmd.Split('%')[3].Split(','));
+		}
+
+		/// <summary>
+		/// 读取opc 数据
+		/// </summary>
+		/// <param name="starttime"></param>
+		/// <param name="endtime"></param>
+		/// <param name="step"></param>
+		/// <param name="tags"></param>
+		/// <returns></returns>
+		private static byte[] readDataFromOpc(string starttime,string endtime,string step,List<string>tags)
+		{
+			string serverName = "OPCServerHDA.WinCC.1";
+			//HDA主机名
+			string hostName = ""; //"WIN-NVSKV8UAC6U";
+			hostName = Dns.GetHostName();
+			//创建一个客户端
+			var hdac = new OPCHDAClient(hostName,serverName);//OPCHDA.Client();
+			try
+			{
+				bool _connected = hdac.Connect();
+				//添加点
+				foreach (string tag in tags)
+				{
+					hdac.AddItem(@tag);
+				}
+				DateTime start = DateTime.Parse(starttime);
+				DateTime end = DateTime.Parse(endtime);
+				//读取数据到datatable    
+				DataTable dt = hdac.ReadByInterval(start, end, int.Parse(step), true);
+				//序列化为json
+				
+				string strJson =DataTableToJson(dt);
+				hdac.Disconnect();
+				strJson = GZipCompressString(strJson);
+				return Encoding.UTF8.GetBytes(strJson);
+			}
+			catch (Exception ex)
+			{				
+				Console.WriteLine(ex.Message);
+				return new byte[1];
+			}
+		}
+
+		/// <summary>
+		/// 数据表序列化为json
+		/// </summary>
+		/// <param name="dt"></param>
+		/// <returns></returns>
+		private static string DataTableToJson(DataTable dt)
+		{
+			string strResult = "";
+		
+			JavaScriptSerializer s = new JavaScriptSerializer();
+			List<dataRow> rows = new List<dataRow> { };
+			foreach (DataRow row in dt.Rows)
+			{
+				rows.Add(new dataRow { TimeStamp = row["Timestamp"].ToString(), TagName = row["TagName"].ToString(), Value = row["Value"].ToString(), Quality = row["Quality"].ToString() });
+			}
+			strResult = s.Serialize(rows);
+			return strResult;
+		}
+
+		/// <summary>
+		/// zip 压缩
+		/// </summary>
+		/// <param name="rawString"></param>
+		/// <returns></returns>
+		private static string GZipCompressString(string rawString)
+		{
+			if (string.IsNullOrEmpty(rawString) || rawString.Length == 0)
+			{
+				return "";
+			}
+			else
+			{
+				byte[] rawData = System.Text.Encoding.UTF8.GetBytes(rawString.ToString());
+				byte[] zippedData = Compress(rawData);
+				return (string)(Convert.ToBase64String(zippedData));
+				//return zippedData.ToString();
+			}
+		}
+
+		/// <summary>
+		/// 压缩
+		/// </summary>
+		/// <param name="rawData"></param>
+		/// <returns></returns>
+		private static  byte[] Compress(byte[] rawData)
+		{
+			MemoryStream ms = new MemoryStream();
+			GZipStream compressedzipStream = new GZipStream(ms, CompressionMode.Compress, true);
+			compressedzipStream.Write(rawData, 0, rawData.Length);
+			compressedzipStream.Close();
+			return ms.ToArray();
 		}
 		#endregion
 	}

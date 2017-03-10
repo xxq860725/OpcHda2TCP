@@ -21,7 +21,7 @@ namespace OpcHda2TcpClient
 			if (isConnected)
 			{
 				//发送命令到服务器，命令长度较短，暂时没有考虑传输错误
-				myClient.SyncSend("111222333444555666777888999000");
+				myClient.SyncSend(@"2016-09-25 08:00:00%2016-09-25 09:00:00%5%Arch\H4/PT001.Value,Arch\H4/PT002.Value,Arch\H4/PT003.Value");
 				//读取服务器返回的包头
 				myClient.ReadHeader();
 				//读取返回的数据
@@ -35,6 +35,7 @@ namespace OpcHda2TcpClient
 		{
 			Console.WriteLine("收到读取完毕事件！");
 			Console.WriteLine("收到数据长度:{0}",e._msg.Length);
+			Console.WriteLine(e._msg);
 		}
 	}
 }
