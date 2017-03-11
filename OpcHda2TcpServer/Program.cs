@@ -16,19 +16,16 @@ namespace OpcHda2TcpServer
 		private static AsyncTCPServer myTcpServer = new AsyncTCPServer(IPAddress.Parse("127.0.0.1"), 3000);//监听本机3000端口
 		private static OPCHDAClient myOpcClient = new OPCHDAClient("", "OPCServerHDA.WinCC.1");
 		static void Main(string[] args)
-		{			
+		{
+			//禁止关闭按钮
+			Util.DisableCloseButton(Console.Title);
 			#region 事件注册
-
 			myTcpServer.ClientConnected += MyTcpServer_ClientConnected;
-
 			myTcpServer.DataReceived += MyTcpServer_DataReceived;
-
 			myTcpServer.CompletedSend += MyTcpServer_CompletedSend;
-
 			myTcpServer.ClientDisconnected += MyTcpServer_ClientDisconnected;
-			
 			#endregion
-
+		
 			myTcpServer.Start();
 			Console.WriteLine("服务器已经启动，正在监听中.....");
 			while (true)//程序停在这里
@@ -38,6 +35,11 @@ namespace OpcHda2TcpServer
 			}
 
 		}
+		/// <summary>
+		/// 客户端断开连接事件
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private static void MyTcpServer_ClientDisconnected(object sender, AsyncEventArgs e)
 		{
 			Console.WriteLine(  "客户端断开连接，当前连接数："+myTcpServer.ClientCount);

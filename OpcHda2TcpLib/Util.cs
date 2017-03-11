@@ -4,7 +4,9 @@ using System.Data;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 
@@ -15,12 +17,13 @@ namespace OpcHda2Tcp
 	/// </summary>
 	public static class Util
 	{
+		#region 压缩与序列化
 		/// <summary>
 		/// Gzip 压缩
 		/// </summary>
 		/// <param name="rawString"></param>
 		/// <returns></returns>
-		public  static string GZipCompressString(string rawString)
+		public static string GZipCompressString(string rawString)
 		{
 			if (string.IsNullOrEmpty(rawString) || rawString.Length == 0)
 			{
@@ -102,13 +105,51 @@ namespace OpcHda2Tcp
 					dt.Rows.Add(DR);
 				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				Console.WriteLine(ex.Message);
 				return dtEmpty;
 			}
 			return dt;
 		}
+		#endregion
+		#region 禁用关闭按钮（复制的别人的）
+		[DllImport("User32.dll", EntryPoint = "FindWindow")]
+		static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+		[DllImport("user32.dll", EntryPoint = "GetSystemMenu")]
+		static extern IntPtr GetSystemMenu(IntPtr hWnd, IntPtr bRevert);
+
+		[DllImport("user32.dll", EntryPoint = "RemoveMenu")]
+		static extern IntPtr RemoveMenu(IntPtr hMenu, uint uPosition, uint uFlags);
+
+		/// <summary>
+		/// 禁用关闭按钮
+		/// </summary>
+		/// <param name="consoleName">控制台名字</param>
+		public static void DisableCloseButton(string title)
+		{
+			//线程睡眠，确保closebtn中能够正常FindWindow，否则有时会Find失败。。
+			Thread.Sleep(100);
+			IntPtr windowHandle = FindWindow(null, title);
+			IntPtr closeMenu = GetSystemMenu(windowHandle, IntPtr.Zero);
+			uint SC_CLOSE = 0xF060;
+			RemoveMenu(closeMenu, SC_CLOSE, 0x0);
+		}
+
+		/// <summary>
+		/// 检查窗口是否存在
+		/// </summary>
+		/// <param name="title"></param>
+		/// <returns></returns>
+		public static bool IsExistsConsole(string title)
+		{
+			IntPtr windowHandle = FindWindow(null, title);
+			if (windowHandle.Equals(IntPtr.Zero)) return false;
+			return true;
+		}
+		#endregion
+
 
 		#region 私有方法
 		/// <summary>
