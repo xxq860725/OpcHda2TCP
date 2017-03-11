@@ -61,6 +61,7 @@ namespace OpcHda2Tcp
 		{
 			string strResult = "";
 			JavaScriptSerializer s = new JavaScriptSerializer();
+			s.MaxJsonLength = int.MaxValue;
 			List<dataRow> rows = new List<dataRow> { };
 			foreach (DataRow row in dt.Rows)
 			{
@@ -87,6 +88,7 @@ namespace OpcHda2Tcp
 			List<dataRow> dataRows = new List<dataRow> { };
 			if (jsonString == "") return dtEmpty;
 			JavaScriptSerializer s = new JavaScriptSerializer();
+			s.MaxJsonLength = int.MaxValue;
 			try
 			{
 				dataRows = s.Deserialize<List<dataRow>>(jsonString);
