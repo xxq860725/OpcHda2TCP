@@ -102,8 +102,9 @@ namespace OpcHda2Tcp
 					dt.Rows.Add(DR);
 				}
 			}
-			catch
+			catch(Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 				return dtEmpty;
 			}
 			return dt;

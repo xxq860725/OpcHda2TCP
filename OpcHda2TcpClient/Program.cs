@@ -37,7 +37,7 @@ namespace OpcHda2TcpClient
 		{
 			Console.WriteLine("收到读取完毕事件！");
 			Console.WriteLine("收到数据长度:{0}",e._msg.Length);
-			Console.WriteLine(Util.GZipDecompressString(e._msg));
+			Console.WriteLine("解压缩后数据长度：{0}",Util.GZipDecompressString(e._msg).Length);
 			DataTable dt = Util.JsonToDataTable(Util.GZipDecompressString(e._msg));
 			Console.WriteLine("反序列化输出行数：{0}", dt.Rows.Count);
 		}

@@ -148,7 +148,7 @@ namespace OpcHda2Tcp
 			//Console.WriteLine("RecivedData Count:{0}", RecivedData.Count);
 			if (RecivedData.Count >= _dataLength)
 			{
-				Console.WriteLine("读取完成！");
+				//Console.WriteLine("读取完成！");
 				AsyncReadcompleted?.Invoke(this, new AsyncEventArgs(Encoding.UTF8.GetString(RecivedData.ToArray())));
 			}
 			else
