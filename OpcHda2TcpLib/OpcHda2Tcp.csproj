@@ -53,6 +53,7 @@
     <Compile Include="Opc2TCPClient.cs" />
     <Compile Include="AsyncTCPServer.cs" />
     <Compile Include="dataRow.cs" />
+    <Compile Include="Opc2TcpServer.cs" />
     <Compile Include="OpcHdaClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TCPClientState.cs" />
