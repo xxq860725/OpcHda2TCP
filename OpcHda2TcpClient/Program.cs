@@ -15,7 +15,7 @@ namespace OpcHda2TcpClient
 		static List<byte> reciveData = new List<byte> { };
 		static void Main(string[] args)
 		{
-			AsyncTCPClient myClient = new AsyncTCPClient("127.0.0.1", 3000, 64 * 1024);
+			Opc2TCPClient myClient = new Opc2TCPClient("127.0.0.1", 3000, 64 * 1024);
 			myClient.AsyncReadcompleted += MyClient_AsyncReadcompleted;
 			bool isConnected=myClient.Connect();
 			if (isConnected)

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace OpcHda2Tcp
 {
-	public class AsyncTCPClient
+	public class Opc2TCPClient
 	{
 		/// <summary>
 		/// 服务器ip
@@ -55,7 +55,7 @@ namespace OpcHda2Tcp
 		/// <param name="serverip"></param>
 		/// <param name="serverport"></param>
 		/// <param name="buffersize"></param>
-		public AsyncTCPClient(string serverip,int serverport,int buffersize)
+		public Opc2TCPClient(string serverip,int serverport,int buffersize)
 		{
 			ServerIP = serverip;
 			ServerPort = serverport;

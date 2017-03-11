@@ -50,7 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncEventArgs.cs" />
-    <Compile Include="AsyncTCPClient.cs" />
+    <Compile Include="Opc2TCPClient.cs" />
     <Compile Include="AsyncTCPServer.cs" />
     <Compile Include="dataRow.cs" />
     <Compile Include="OpcHdaClient.cs" />
