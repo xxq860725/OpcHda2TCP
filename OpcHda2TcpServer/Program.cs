@@ -76,6 +76,7 @@ namespace OpcHda2TcpServer
 			sendDatatoClient(state, data.ToArray());
 			Console.WriteLine("发送数据：{0}", data.Length);
 		}
+
 		/// <summary>
 		/// client 连接建立事件
 		/// </summary>
@@ -162,9 +163,9 @@ namespace OpcHda2TcpServer
 				DataTable dt = hdac.ReadByInterval(start, end, int.Parse(step), true);
 				//序列化为json
 				
-				string strJson =DataTableToJson(dt);
+				string strJson = Util.DataTableToJson(dt);
 				hdac.Disconnect();
-				strJson = GZipCompressString(strJson);
+				strJson =Util. GZipCompressString(strJson);
 				return Encoding.UTF8.GetBytes(strJson);
 			}
 			catch (Exception ex)
@@ -172,59 +173,6 @@ namespace OpcHda2TcpServer
 				Console.WriteLine(ex.Message);
 				return new byte[1];
 			}
-		}
-
-		/// <summary>
-		/// 数据表序列化为json
-		/// </summary>
-		/// <param name="dt"></param>
-		/// <returns></returns>
-		private static string DataTableToJson(DataTable dt)
-		{
-			string strResult = "";
-		
-			JavaScriptSerializer s = new JavaScriptSerializer();
-			List<dataRow> rows = new List<dataRow> { };
-			foreach (DataRow row in dt.Rows)
-			{
-				rows.Add(new dataRow { TimeStamp = row["Timestamp"].ToString(), TagName = row["TagName"].ToString(), Value = row["Value"].ToString(), Quality = row["Quality"].ToString() });
-			}
-			strResult = s.Serialize(rows);
-			return strResult;
-		}
-
-		/// <summary>
-		/// zip 压缩
-		/// </summary>
-		/// <param name="rawString"></param>
-		/// <returns></returns>
-		private static string GZipCompressString(string rawString)
-		{
-			if (string.IsNullOrEmpty(rawString) || rawString.Length == 0)
-			{
-				return "";
-			}
-			else
-			{
-				byte[] rawData = System.Text.Encoding.UTF8.GetBytes(rawString.ToString());
-				byte[] zippedData = Compress(rawData);
-				return (string)(Convert.ToBase64String(zippedData));
-				//return zippedData.ToString();
-			}
-		}
-
-		/// <summary>
-		/// 压缩
-		/// </summary>
-		/// <param name="rawData"></param>
-		/// <returns></returns>
-		private static  byte[] Compress(byte[] rawData)
-		{
-			MemoryStream ms = new MemoryStream();
-			GZipStream compressedzipStream = new GZipStream(ms, CompressionMode.Compress, true);
-			compressedzipStream.Write(rawData, 0, rawData.Length);
-			compressedzipStream.Close();
-			return ms.ToArray();
 		}
 		#endregion
 	}
