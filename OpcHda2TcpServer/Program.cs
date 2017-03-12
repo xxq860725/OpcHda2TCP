@@ -19,7 +19,7 @@ namespace OpcHda2TcpServer
 	}
 	class Program
 	{
-		private static AsyncTCPServer myTcpServer = new AsyncTCPServer(IPAddress.Parse("127.0.0.1"), 3000);//监听本机3000端口
+		private static AsyncTCPServer myTcpServer = new AsyncTCPServer(IPAddress.Parse("192.168.0.15"), 3000);//监听本机3000端口
 		private static OPCHDAClient myOpcClient = new OPCHDAClient("", "OPCServerHDA.WinCC.1");
 		static void Main(string[] args)
 		{
