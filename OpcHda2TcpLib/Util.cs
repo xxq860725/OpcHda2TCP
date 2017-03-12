@@ -119,10 +119,9 @@ namespace OpcHda2Tcp
 		/// </summary>
 		/// <param name="SourceString"></param>
 		/// <returns></returns>
-		public static string StringMD5(string SourceString)
+		public static string MD5(string SourceString)
 		{
-			string Result = string.Empty;
-			
+			string Result = string.Empty;			
 			System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
 			byte[] s = md5.ComputeHash(Encoding.UTF8.GetBytes(SourceString));
 			for (int i = 0; i < s.Length; i++)
@@ -130,6 +129,12 @@ namespace OpcHda2Tcp
 				Result += s[i].ToString("X");
 			}
 			return Result;
+		}
+		public static byte[] MD5(byte[] data)
+		{
+			System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
+			byte[] s = md5.ComputeHash(data);
+			return s;
 		}
 
 		#region 禁用关闭按钮（复制的别人的）
