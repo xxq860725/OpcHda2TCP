@@ -8,9 +8,15 @@ using System.IO;
 using System.Data;
 using System.Web.Script.Serialization;
 using System.IO.Compression;
+using System.Threading;
 
 namespace OpcHda2TcpServer
 {
+	struct QueryAndSendPara
+	{
+		public string cmd;
+		public TCPClientState state;
+	}
 	class Program
 	{
 		private static AsyncTCPServer myTcpServer = new AsyncTCPServer(IPAddress.Parse("127.0.0.1"), 3000);//监听本机3000端口
@@ -56,25 +62,11 @@ namespace OpcHda2TcpServer
 			string clientCmdString = Encoding.UTF8.GetString(state.Buffer);
 			clientCmdString = clientCmdString.Trim(new char[] { '\0' });
 			Console.WriteLine("接收到:" + state.TcpClient.Client.RemoteEndPoint.ToString() + "\t" + clientCmdString);
-			//分析命令
-			string starttime, endtime, step;
-			List<string> tags;
-			analisisCmd(clientCmdString, out starttime, out endtime, out step, out tags);
-			//获取数据
-			byte[] data = readDataFromOpc(starttime, endtime, step, tags);
-			//发送数据
-			//准备头包数据
-			byte[] length = System.BitConverter.GetBytes(data.Length);
-			byte[] header = new byte[48];
-			System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
-			byte[] hash= md5.ComputeHash(data);
-			System.Buffer.BlockCopy(length, 0, header, 0, 4);
-			System.Buffer.BlockCopy(hash, 0, header, 4, 16);
-			//发送头包
-			sendDatatoClient(state, header);
-			//发送数据
-			sendDatatoClient(state, data.ToArray());
-			Console.WriteLine("发送数据：{0}", data.Length);
+			QueryAndSendPara pra = new QueryAndSendPara();
+			pra.cmd = clientCmdString;
+			pra.state = state;
+			Thread thread = new Thread(new ParameterizedThreadStart(QueryAndSend));
+			thread.Start(pra);
 		}
 
 		/// <summary>
@@ -173,6 +165,44 @@ namespace OpcHda2TcpServer
 				Console.WriteLine(ex.Message);
 				return new byte[1];
 			}
+		}
+
+		/// <summary>
+		/// 查询并返回数据到客户端
+		/// </summary>
+		/// <param name="clientCmdString"></param>
+		/// <param name="state"></param>
+		private static void QueryAndSend(object para)
+		{
+
+			QueryAndSendPara qPara;
+			if (para is QueryAndSendPara)
+			{
+				qPara = (QueryAndSendPara)para;
+			}
+			else
+			{
+				return;//传入的参数不正确时直接返回，不回应。
+			}
+			//分析命令
+			string starttime, endtime, step;
+			List<string> tags;
+			analisisCmd(qPara.cmd, out starttime, out endtime, out step, out tags);
+			//获取数据
+			byte[] data = readDataFromOpc(starttime, endtime, step, tags);
+			//发送数据
+			//准备头包数据
+			byte[] length = System.BitConverter.GetBytes(data.Length);
+			byte[] header = new byte[48];
+			System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+			byte[] hash = md5.ComputeHash(data);
+			System.Buffer.BlockCopy(length, 0, header, 0, 4);
+			System.Buffer.BlockCopy(hash, 0, header, 4, 16);
+			//发送头包
+			sendDatatoClient(qPara.state, header);
+			//发送数据
+			sendDatatoClient(qPara.state, data.ToArray());
+			Console.WriteLine("发送数据：{0}", data.Length);
 		}
 		#endregion
 	}
