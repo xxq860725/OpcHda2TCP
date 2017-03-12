@@ -113,6 +113,25 @@ namespace OpcHda2Tcp
 			return dt;
 		}
 		#endregion
+
+		/// <summary>
+		/// 计算字符串的MD5值
+		/// </summary>
+		/// <param name="SourceString"></param>
+		/// <returns></returns>
+		public static string StringMD5(string SourceString)
+		{
+			string Result = string.Empty;
+			
+			System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
+			byte[] s = md5.ComputeHash(Encoding.UTF8.GetBytes(SourceString));
+			for (int i = 0; i < s.Length; i++)
+			{
+				Result += s[i].ToString("X");
+			}
+			return Result;
+		}
+
 		#region 禁用关闭按钮（复制的别人的）
 		[DllImport("User32.dll", EntryPoint = "FindWindow")]
 		static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
@@ -149,7 +168,6 @@ namespace OpcHda2Tcp
 			return true;
 		}
 		#endregion
-
 
 		#region 私有方法
 		/// <summary>
