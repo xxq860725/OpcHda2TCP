@@ -12,6 +12,7 @@ using System.Web.Script.Serialization;
 
 namespace OpcHda2Tcp
 {
+
 	/// <summary>
 	/// 静态工具类
 	/// </summary>
@@ -114,6 +115,7 @@ namespace OpcHda2Tcp
 		}
 		#endregion
 
+		#region MD5计算
 		/// <summary>
 		/// 计算字符串的MD5值
 		/// </summary>
@@ -121,7 +123,7 @@ namespace OpcHda2Tcp
 		/// <returns></returns>
 		public static string MD5(string SourceString)
 		{
-			string Result = string.Empty;			
+			string Result = string.Empty;
 			System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
 			byte[] s = md5.ComputeHash(Encoding.UTF8.GetBytes(SourceString));
 			for (int i = 0; i < s.Length; i++)
@@ -135,6 +137,26 @@ namespace OpcHda2Tcp
 			System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
 			byte[] s = md5.ComputeHash(data);
 			return s;
+		}
+		#endregion
+
+		/// <summary>
+		/// 组合tcp消息
+		/// </summary>
+		/// <param name="data"></param>
+		/// <returns></returns>
+		public static byte[] MakeMessage(byte[] data)
+		{
+			byte[] length = System.BitConverter.GetBytes(data.Length);
+			byte[] header = new byte[48];
+			//System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+			byte[] hash = MD5(data);//md5.ComputeHash(data);
+			Buffer.BlockCopy(length, 0, header, 0, 4);
+			Buffer.BlockCopy(hash, 0, header, 4, hash.Length);
+			byte[] message = new byte[data.Length + header.Length];
+			Buffer.BlockCopy(header, 0, message, 0, header.Length);
+			Buffer.BlockCopy(data, 0, message, header.Length, data.Length);
+			return message;
 		}
 
 		#region 禁用关闭按钮（复制的别人的）
