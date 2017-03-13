@@ -3,7 +3,7 @@ using Opc.Hda;
 using System.Data;
 using System.Net;
 
-namespace OpcHda2Tcp
+namespace OpcHda2Tcp.Server
 {
 	public class OPCHDAClient:IDisposable
 	{		
@@ -210,7 +210,7 @@ namespace OpcHda2Tcp
 
 		}
 
-		#region IDisposable Support
+		#region IDisposable Support 
 		private bool disposedValue = false; // 要检测冗余调用
 
 		protected virtual void Dispose(bool disposing)
