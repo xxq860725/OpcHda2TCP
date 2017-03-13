@@ -14,7 +14,7 @@ namespace OpcHda2TcpClient
 	class Program
 	{
 		//static int ll = 0;
-		static List<byte> reciveData = new List<byte> { };
+		//static List<byte> reciveData = new List<byte> { };
 		static void Main(string[] args)
 		{
 			Opc2TCPClient myClient = new Opc2TCPClient("127.0.0.1", 3000, 64 * 1024);
