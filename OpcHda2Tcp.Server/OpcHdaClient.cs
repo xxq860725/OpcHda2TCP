@@ -5,7 +5,7 @@ using System.Net;
 
 namespace OpcHda2Tcp
 {
-	public class OPCHDAClient
+	public class OPCHDAClient:IDisposable
 	{		
 		private Opc.Hda.Server _hdaServer = null;
 		private string _hostName, _serverName;
@@ -203,7 +203,36 @@ namespace OpcHda2Tcp
 		public void Disconnect()
 		{
 			if (_hdaServer != null && _hdaServer.IsConnected)
+			{
 				_hdaServer.Disconnect();
+				_hdaServer.Dispose();
+			}
+
 		}
+
+		#region IDisposable Support
+		private bool disposedValue = false; // 要检测冗余调用
+
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!disposedValue)
+			{
+				if (disposing)
+				{
+					_hdaServer.Dispose();
+					Disconnect();
+				}
+				disposedValue = true;
+			}
+		}
+		// 添加此代码以正确实现可处置模式。
+		void IDisposable.Dispose()
+		{
+			// 请勿更改此代码。将清理代码放入以上 Dispose(bool disposing) 中。
+			Dispose(true);
+			// TODO: 如果在以上内容中替代了终结器，则取消注释以下行。
+			// GC.SuppressFinalize(this);
+		}
+		#endregion
 	}
 }
