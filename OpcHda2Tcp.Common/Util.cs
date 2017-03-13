@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 
-namespace OpcHda2Tcp
+namespace OpcHda2Tcp.Common
 {
 
 	/// <summary>

@@ -56,9 +56,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\OpcHda2TcpLib\OpcHda2Tcp.csproj">
-      <Project>{87c9b988-1230-4fd4-8393-f0860fbce565}</Project>
-      <Name>OpcHda2Tcp</Name>
+    <ProjectReference Include="..\OpcHda2Tcp.Client\OpcHda2Tcp.Client.csproj">
+      <Project>{32126F09-491F-4790-8A60-0751B1D4FC62}</Project>
+      <Name>OpcHda2Tcp.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OpcHda2Tcp.Common\OpcHda2Tcp.Common.csproj">
+      <Project>{22A8625F-6E27-4B68-AD84-6041D06CFC71}</Project>
+      <Name>OpcHda2Tcp.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

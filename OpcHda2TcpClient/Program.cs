@@ -1,24 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Net;
-using System.Text;
-using System.IO;
-using System.Threading;
-using OpcHda2Tcp;
 using System.Data;
+using OpcHda2Tcp.Common;
+using OpcHda2Tcp.Client;
 
 namespace OpcHda2TcpClient
 {
 	class Program
 	{
-		//static int ll = 0;
-		//static List<byte> reciveData = new List<byte> { };
 		static void Main(string[] args)
 		{
-			//Console.WriteLine("输入服务器ip：");
-			//string ip=Console.ReadLine();
 			Opc2TCPClient myClient = new Opc2TCPClient("10.132.94.5", 3000, 64 * 1024);
 			myClient.AsyncReadcompleted += MyClient_AsyncReadcompleted;
 			bool isConnected=myClient.Connect();
@@ -54,7 +44,6 @@ namespace OpcHda2TcpClient
 				DataTable dt = Util.JsonToDataTable(msg);
 				Console.WriteLine("反序列化输出行数：{0}", dt.Rows.Count);
 			}
-
 		}
 	}
 }

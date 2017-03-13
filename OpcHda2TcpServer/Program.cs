@@ -9,6 +9,7 @@ using System.Data;
 using System.Web.Script.Serialization;
 using System.IO.Compression;
 using System.Threading;
+using OpcHda2Tcp.Common;
 
 namespace OpcHda2TcpServer
 {
