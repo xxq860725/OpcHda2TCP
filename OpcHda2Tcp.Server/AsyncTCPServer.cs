@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Net;
 using OpcHda2Tcp.Common;
 
-namespace OpcHda2Tcp
+namespace OpcHda2Tcp.Server
 {
 	/// <summary>
 	/// TcpListener实现异步TCP服务器

@@ -61,6 +61,10 @@
       <Project>{22A8625F-6E27-4B68-AD84-6041D06CFC71}</Project>
       <Name>OpcHda2Tcp.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\OpcHda2Tcp.Server\OpcHda2Tcp.Server.csproj">
+      <Project>{87C9B988-1230-4FD4-8393-F0860FBCE565}</Project>
+      <Name>OpcHda2Tcp.Server</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

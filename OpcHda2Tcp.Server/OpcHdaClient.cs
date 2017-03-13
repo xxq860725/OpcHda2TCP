@@ -11,7 +11,8 @@ namespace OpcHda2Tcp
 {
 	public class OPCHDAClient
 	{
-		private Server _hdaServer = null;
+		
+		private Opc.Hda.Server _hdaServer = null;
 		private string _hostName, _serverName;
 
 		/// <summary>

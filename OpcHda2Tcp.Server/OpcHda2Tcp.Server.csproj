@@ -7,8 +7,8 @@
     <ProjectGuid>{87C9B988-1230-4FD4-8393-F0860FBCE565}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpcHda2Tcp</RootNamespace>
-    <AssemblyName>OpcHda2Tcp</AssemblyName>
+    <RootNamespace>OpcHda2Tcp.Server</RootNamespace>
+    <AssemblyName>OpcHda2Tcp.Server</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
