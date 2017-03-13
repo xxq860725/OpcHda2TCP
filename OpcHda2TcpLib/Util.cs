@@ -51,8 +51,8 @@ namespace OpcHda2Tcp
 			}
 			else
 			{
-				byte[] zippedData = Convert.FromBase64String(zippedString.ToString());
-				return (string)(System.Text.Encoding.UTF8.GetString(Decompress(zippedData)));
+				byte[] zippedData = Convert.FromBase64String(zippedString);
+				return(Encoding.UTF8.GetString(Decompress(zippedData)));
 			}
 		}
 
@@ -123,7 +123,7 @@ namespace OpcHda2Tcp
 		/// <returns></returns>
 		public static string MD5(string SourceString)
 		{
-			string Result = string.Empty;
+			string Result = string.Empty;		
 			System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
 			byte[] s = md5.ComputeHash(Encoding.UTF8.GetBytes(SourceString));
 			for (int i = 0; i < s.Length; i++)
@@ -136,6 +136,10 @@ namespace OpcHda2Tcp
 		{
 			System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
 			byte[] s = md5.ComputeHash(data);
+			for (int i = 0; i > s.Length; i++)
+			{
+				s[i] = Convert.ToByte(s[i].ToString("X"));
+			}
 			return s;
 		}
 		#endregion
@@ -147,8 +151,32 @@ namespace OpcHda2Tcp
 		/// <returns></returns>
 		public static byte[] MakeMessage(byte[] data)
 		{
-			byte[] length = System.BitConverter.GetBytes(data.Length);
+			
 			byte[] header = new byte[48];
+			
+			byte[] length = BitConverter.GetBytes(data.Length+ header.Length);
+			//System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+			byte[] hash = MD5(data);//md5.ComputeHash(data);
+			Buffer.BlockCopy(length, 0, header, 0, 4);
+			Buffer.BlockCopy(hash, 0, header, 4, hash.Length);
+
+			byte[] message = new byte[data.Length + header.Length];
+			Buffer.BlockCopy(header, 0, message, 0, header.Length);
+			Buffer.BlockCopy(data, 0, message, header.Length, data.Length);
+			//Console.WriteLine(message.Length);
+			return message;
+		}
+
+		/// <summary>
+		/// 组合tcp消息
+		/// </summary>
+		/// <param name="strMessage"></param>
+		/// <returns></returns>
+		public static byte[] MakeMessage(string strMessage)
+		{
+			byte[] header = new byte[48];
+			byte[] data = Encoding.UTF8.GetBytes(GZipCompressString(strMessage));
+			byte[] length = BitConverter.GetBytes(data.Length + header.Length);
 			//System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
 			byte[] hash = MD5(data);//md5.ComputeHash(data);
 			Buffer.BlockCopy(length, 0, header, 0, 4);
@@ -156,7 +184,48 @@ namespace OpcHda2Tcp
 			byte[] message = new byte[data.Length + header.Length];
 			Buffer.BlockCopy(header, 0, message, 0, header.Length);
 			Buffer.BlockCopy(data, 0, message, header.Length, data.Length);
+			//Console.WriteLine(message.Length);
 			return message;
+		}
+
+		/// <summary>
+		/// 验证接收到的消息
+		/// </summary>
+		/// <param name="byteMessage"> 接收到的byte[] 内容</param>
+		/// <param name="strMessage">如果验证成功返回字符串消息</param>
+		/// <returns>是否验证成功</returns>
+		public static bool VeryfyMessage(byte[] byteMessage,out string strMessage)
+		{			
+			//bool bSucceed = false;
+			strMessage = string.Empty;
+			string s = Encoding.ASCII.GetString(byteMessage).TrimEnd('\0');
+			if (s.Length <= 48) return false;
+			byte[] header = new byte[48];
+			byte[] byteInt = new byte[4];
+			byte[] md5 = new byte[16];
+			byte[] data = new byte[s.Length - 48];
+			Buffer.BlockCopy(byteMessage, 0, header, 0, 48);
+			Buffer.BlockCopy(header, 0, byteInt, 0, 4);
+			Buffer.BlockCopy(header, 4, md5, 0, 16);
+			Buffer.BlockCopy(byteMessage, 48, data, 0, data.Length);
+			int _dataLength = BitConverter.ToInt32(byteInt, 0);
+			if (_dataLength != (data.Length+header.Length))
+			{
+				Console.WriteLine("接收的数据长度不匹配{0}，{1}",_dataLength, data.Length + header.Length);
+				return false;
+			}
+			byte[] md5Hash =  MD5(data);
+			for (int i = 0; i < md5.Length; i++)
+			{
+				if (md5[i] != md5Hash[i])
+				{
+					Console.WriteLine("MD5 校验错误！");
+					return false;
+				}
+			}
+
+			strMessage=GZipDecompressString(Encoding.UTF8.GetString(data));
+			return true;
 		}
 
 		#region 禁用关闭按钮（复制的别人的）

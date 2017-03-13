@@ -24,10 +24,21 @@ namespace OpcHda2Tcp
 		/// </summary>
 		public bool IsHandled { get; set; }
 
+		/// <summary>
+		/// byte数组
+		/// </summary>
+		public byte[] _data;
+
 		#region 构造函数
 		public AsyncEventArgs(string msg)
 		{
 			this._msg = msg;
+			IsHandled = false;
+		}
+
+		public AsyncEventArgs(byte[] data)
+		{
+			this._data = data;
 			IsHandled = false;
 		}
 

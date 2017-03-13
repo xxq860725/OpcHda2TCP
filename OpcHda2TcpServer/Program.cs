@@ -19,7 +19,7 @@ namespace OpcHda2TcpServer
 	}
 	class Program
 	{
-		private static AsyncTCPServer myTcpServer = new AsyncTCPServer(IPAddress.Parse("192.168.0.15"), 3000);//监听本机3000端口
+		private static AsyncTCPServer myTcpServer = new AsyncTCPServer(IPAddress.Parse("127.0.0.1"), 3000);//监听本机3000端口
 		private static OPCHDAClient myOpcClient = new OPCHDAClient("", "OPCServerHDA.WinCC.1");
 		static void Main(string[] args)
 		{
@@ -59,8 +59,13 @@ namespace OpcHda2TcpServer
 		private static void MyTcpServer_DataReceived(object sender, AsyncEventArgs e)
 		{
 			TCPClientState state = e._state;
-			string clientCmdString = Encoding.UTF8.GetString(state.Buffer);
-			clientCmdString = clientCmdString.Trim(new char[] { '\0' });
+
+			string clientCmdString = ""; //= Encoding.UTF8.GetString(state.Buffer);
+			byte[] data = new byte[state.Buffer.Length];
+			Buffer.BlockCopy(state.Buffer, 0, data, 0, state.Buffer.Length);
+			bool bsucceed= Util.VeryfyMessage(data, out clientCmdString);
+			if (!bsucceed) return;
+			//clientCmdString = clientCmdString.Trim(new char[] { '\0' });
 			Console.WriteLine("接收到:" + state.TcpClient.Client.RemoteEndPoint.ToString() + "\t" + clientCmdString);
 			QueryAndSendPara pra = new QueryAndSendPara();
 			pra.cmd = clientCmdString;
@@ -133,7 +138,7 @@ namespace OpcHda2TcpServer
 		/// <param name="step"></param>
 		/// <param name="tags"></param>
 		/// <returns></returns>
-		private static byte[] readDataFromOpc(string starttime,string endtime,string step,List<string>tags)
+		private static string readDataFromOpc(string starttime,string endtime,string step,List<string>tags)
 		{
 			string serverName = "OPCServerHDA.WinCC.1";
 			//HDA主机名
@@ -153,17 +158,16 @@ namespace OpcHda2TcpServer
 				DateTime end = DateTime.Parse(endtime);
 				//读取数据到datatable    
 				DataTable dt = hdac.ReadByInterval(start, end, int.Parse(step), true);
-				//序列化为json
-				
+				//序列化为json			
 				string strJson = Util.DataTableToJson(dt);
 				hdac.Disconnect();
-				strJson =Util. GZipCompressString(strJson);
-				return Encoding.UTF8.GetBytes(strJson);
+				//strJson =Util.GZipCompressString(strJson);
+				return strJson;//Encoding.UTF8.GetBytes(strJson);
 			}
 			catch (Exception ex)
 			{				
 				Console.WriteLine(ex.Message);
-				return new byte[1];
+				return"";
 			}
 		}
 
@@ -188,21 +192,12 @@ namespace OpcHda2TcpServer
 			string starttime, endtime, step;
 			List<string> tags;
 			analisisCmd(qPara.cmd, out starttime, out endtime, out step, out tags);
-			//获取数据
-			byte[] data = readDataFromOpc(starttime, endtime, step, tags);
+			//获取数据(已经序列化并压缩)
+			string  message = readDataFromOpc(starttime, endtime, step, tags);
 			//发送数据
-			//准备头包数据
-			byte[] length = System.BitConverter.GetBytes(data.Length);
-			byte[] header = new byte[48];
-			System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
-			byte[] hash = md5.ComputeHash(data);
-			System.Buffer.BlockCopy(length, 0, header, 0, 4);
-			System.Buffer.BlockCopy(hash, 0, header, 4, 16);
-			//发送头包
-			sendDatatoClient(qPara.state, header);
-			//发送数据
-			sendDatatoClient(qPara.state, data.ToArray());
-			Console.WriteLine("发送数据：{0}", data.Length);
+			byte[] sendData = Util.MakeMessage(message);
+			sendDatatoClient(qPara.state, sendData);
+			Console.WriteLine("发送ZIP压缩数据：{0}", sendData.Length);
 		}
 		#endregion
 	}

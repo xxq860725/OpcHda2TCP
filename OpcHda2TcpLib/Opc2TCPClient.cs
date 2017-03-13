@@ -94,6 +94,17 @@ namespace OpcHda2Tcp
 		}
 
 		/// <summary>
+		/// 同步发送数据
+		/// </summary>
+		/// <param name="data">客户端发送给服务器的信息</param>
+		public void SyncSend(byte[] data)
+		{
+			//List<byte> data = new List<byte> { };
+			//data.AddRange(Encoding.UTF8.GetBytes(data));
+			this.NetworkStream.Write(data, 0, data.Length);
+		}
+
+		/// <summary>
 		/// 异步读取
 		/// </summary>
 		public void AsyncRead()
@@ -146,15 +157,24 @@ namespace OpcHda2Tcp
 			System.Buffer.BlockCopy(Buffer, 0, buff,0,recv);
 			RecivedData.AddRange(buff);
 			//Console.WriteLine("RecivedData Count:{0}", RecivedData.Count);
-			if (RecivedData.Count >= _dataLength)
+			string m = "";
+			if (Util.VeryfyMessage(RecivedData.ToArray(), out m))
 			{
-				//Console.WriteLine("读取完成！");
-				AsyncReadcompleted?.Invoke(this, new AsyncEventArgs(Encoding.UTF8.GetString(RecivedData.ToArray())));
+				AsyncReadcompleted?.Invoke(this, new AsyncEventArgs(RecivedData.ToArray()));
 			}
 			else
 			{
 				stream.BeginRead(Buffer, 0, Buffer.Length, asyncread, client);
-			}			
+			}
+			//if (RecivedData.Count >= _dataLength)
+			//{
+			//	//Console.WriteLine("读取完成！");
+			//	AsyncReadcompleted?.Invoke(this, new AsyncEventArgs(Encoding.UTF8.GetString(RecivedData.ToArray())));
+			//}
+			//else
+			//{
+			//	stream.BeginRead(Buffer, 0, Buffer.Length, asyncread, client);
+			//}			
 		}
 
 		/// <summary>
