@@ -17,7 +17,9 @@ namespace OpcHda2TcpClient
 		//static List<byte> reciveData = new List<byte> { };
 		static void Main(string[] args)
 		{
-			Opc2TCPClient myClient = new Opc2TCPClient("127.0.0.1", 3000, 64 * 1024);
+			//Console.WriteLine("输入服务器ip：");
+			//string ip=Console.ReadLine();
+			Opc2TCPClient myClient = new Opc2TCPClient("10.132.94.5", 3000, 64 * 1024);
 			myClient.AsyncReadcompleted += MyClient_AsyncReadcompleted;
 			bool isConnected=myClient.Connect();
 			if (isConnected)
@@ -47,7 +49,7 @@ namespace OpcHda2TcpClient
 			}
 			else
 			{
-				Console.WriteLine("解压缩前的数据长度{0}",Encoding.UTF8.GetString(e._data).Length);
+				Console.WriteLine("解压缩前的数据长度{0}",e._data.Length);
 				Console.WriteLine("解压缩后数据长度：{0}", msg.Length);
 				DataTable dt = Util.JsonToDataTable(msg);
 				Console.WriteLine("反序列化输出行数：{0}", dt.Rows.Count);

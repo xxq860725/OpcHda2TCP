@@ -23,6 +23,9 @@ namespace OpcHda2TcpServer
 		private static OPCHDAClient myOpcClient = new OPCHDAClient("", "OPCServerHDA.WinCC.1");
 		static void Main(string[] args)
 		{
+			Console.WriteLine("输入监听ip：");
+			string ip = Console.ReadLine();
+			myTcpServer= new AsyncTCPServer(IPAddress.Parse(ip), 3000);
 			//禁止关闭按钮
 			Util.DisableCloseButton(Console.Title);
 			#region 事件注册
@@ -39,6 +42,10 @@ namespace OpcHda2TcpServer
 				string arg = Console.ReadLine();
 				if (arg == "exit") break;
 			}
+			myTcpServer.CloseAllClient();
+			myTcpServer.Stop();
+			Console.WriteLine("任务已经结束,按回车退出程序...");
+			Console.ReadLine();
 
 		}
 		/// <summary>

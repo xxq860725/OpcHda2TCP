@@ -211,7 +211,7 @@ namespace OpcHda2Tcp
 			int _dataLength = BitConverter.ToInt32(byteInt, 0);
 			if (_dataLength != (data.Length+header.Length))
 			{
-				Console.WriteLine("接收的数据长度不匹配{0}，{1}",_dataLength, data.Length + header.Length);
+				Console.WriteLine("等待接收完毕.....");
 				return false;
 			}
 			byte[] md5Hash =  MD5(data);
