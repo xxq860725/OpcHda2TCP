@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Opc.Hda;
 using System.Data;
 using System.Net;
@@ -10,8 +6,7 @@ using System.Net;
 namespace OpcHda2Tcp
 {
 	public class OPCHDAClient
-	{
-		
+	{		
 		private Opc.Hda.Server _hdaServer = null;
 		private string _hostName, _serverName;
 

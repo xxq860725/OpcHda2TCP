@@ -229,14 +229,7 @@ namespace OpcHda2Tcp.Common
 		}
 
 		#region 禁用关闭按钮（复制的别人的）
-		[DllImport("User32.dll", EntryPoint = "FindWindow")]
-		static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
 
-		[DllImport("user32.dll", EntryPoint = "GetSystemMenu")]
-		static extern IntPtr GetSystemMenu(IntPtr hWnd, IntPtr bRevert);
-
-		[DllImport("user32.dll", EntryPoint = "RemoveMenu")]
-		static extern IntPtr RemoveMenu(IntPtr hMenu, uint uPosition, uint uFlags);
 
 		/// <summary>
 		/// 禁用关闭按钮
@@ -246,10 +239,10 @@ namespace OpcHda2Tcp.Common
 		{
 			//线程睡眠，确保closebtn中能够正常FindWindow，否则有时会Find失败。。
 			Thread.Sleep(100);
-			IntPtr windowHandle = FindWindow(null, title);
-			IntPtr closeMenu = GetSystemMenu(windowHandle, IntPtr.Zero);
+			IntPtr windowHandle = NativeMethods.FindWindow(null, title);
+			IntPtr closeMenu =NativeMethods. GetSystemMenu(windowHandle, IntPtr.Zero);
 			uint SC_CLOSE = 0xF060;
-			RemoveMenu(closeMenu, SC_CLOSE, 0x0);
+			NativeMethods. RemoveMenu(closeMenu, SC_CLOSE, 0x0);
 		}
 
 		/// <summary>
@@ -259,7 +252,7 @@ namespace OpcHda2Tcp.Common
 		/// <returns></returns>
 		public static bool IsExistsConsole(string title)
 		{
-			IntPtr windowHandle = FindWindow(null, title);
+			IntPtr windowHandle =NativeMethods. FindWindow(null, title);
 			if (windowHandle.Equals(IntPtr.Zero)) return false;
 			return true;
 		}
