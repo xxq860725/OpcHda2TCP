@@ -36,14 +36,24 @@ namespace OpcHda2Tcp.Client
 		public NetworkStream NetworkStream { get; private set; }
 
 		/// <summary>
-		/// 缓冲区
-		/// </summary>
-		public byte[] Buffer;
-
-		/// <summary>
 		/// 接收到的数据
 		/// </summary>
 		public List<byte> RecivedData = new List<byte> { };
+
+		/// <summary>
+		/// 缓冲区
+		/// </summary>
+		private byte[] Buffer;
+
+		/// <summary>
+		/// 是否建立连接
+		/// </summary>
+		public bool isConnected { get; private set; }
+
+		/// <summary>
+		/// 已经接收全部数据
+		/// </summary>
+		public bool RecivedAll { get; private set; }
 
 		/// <summary>
 		///接收的数据长度（字节数） 
@@ -75,10 +85,12 @@ namespace OpcHda2Tcp.Client
 			{
 				tcpClient.Connect(IPAddress.Parse(ServerIP), ServerPort);
 				this.NetworkStream = tcpClient.GetStream();
+				isConnected = true;
 				return true;
 			}
 			catch
 			{
+				isConnected = false;
 				return false;
 			}
 		}
@@ -161,10 +173,12 @@ namespace OpcHda2Tcp.Client
 			string m = "";
 			if (Util.VeryfyMessage(RecivedData.ToArray(), out m))
 			{
+				RecivedAll = true;
 				AsyncReadcompleted?.Invoke(this, new AsyncEventArgs(RecivedData.ToArray()));
 			}
 			else
 			{
+				RecivedAll = false;
 				stream.BeginRead(Buffer, 0, Buffer.Length, asyncread, client);
 			}
 			//if (RecivedData.Count >= _dataLength)
