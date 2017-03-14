@@ -2,6 +2,7 @@
 using System.Data;
 using OpcHda2Tcp.Common;
 using OpcHda2Tcp.Client;
+using System.Threading;
 
 namespace OpcHda2TcpClient
 {
@@ -10,7 +11,7 @@ namespace OpcHda2TcpClient
 		static void Main(string[] args)
 		{
 			Opc2TCPClient myClient = new Opc2TCPClient("10.132.94.5", 3000, 64 * 1024);
-			myClient.AsyncReadcompleted += MyClient_AsyncReadcompleted;
+			//myClient.AsyncReadcompleted += MyClient_AsyncReadcompleted;
 			bool isConnected=myClient.Connect();
 			if (isConnected)
 			{
@@ -23,6 +24,28 @@ namespace OpcHda2TcpClient
 				//myClient.ReadHeader();
 				//读取返回的数据
 				myClient.AsyncRead();
+				while (true)
+				{
+					if (myClient.RecivedAll)
+					{
+						Console.WriteLine("收到读取完毕事件！");
+						string msg = "";
+						bool b = Util.VeryfyMessage(myClient.RecivedData.ToArray(), out msg);
+						if (!b)
+						{
+							Console.WriteLine("验证消息失败");
+						}
+						else
+						{
+							Console.WriteLine("解压缩前的数据长度{0}", myClient.RecivedData.Count);
+							Console.WriteLine("解压缩后数据长度：{0}", msg.Length);
+							DataTable dt = Util.JsonToDataTable(msg);
+							Console.WriteLine("反序列化输出行数：{0}", dt.Rows.Count);
+						}
+						break;					
+					}
+					Thread.Sleep(100);
+				}
 			}
 			Console.ReadLine();
 			myClient.Close();
