@@ -3,6 +3,9 @@ using System.Data;
 using OpcHda2Tcp.Common;
 using OpcHda2Tcp.Client;
 using System.Threading;
+using System.IO;
+using System.Collections.Generic;
+using System.Text;
 
 namespace OpcHda2TcpClient
 {
@@ -15,8 +18,17 @@ namespace OpcHda2TcpClient
 			bool isConnected=myClient.Connect();
 			if (isConnected)
 			{
+				FileStream fs = new FileStream(AppDomain.CurrentDomain.BaseDirectory + "\\tags.tl", FileMode.Open);
+				StreamReader sr = new StreamReader(fs, Encoding.Default);
+				List<string> tags = new List<string> { };
+				string line = sr.ReadLine();
+				string message = "";
+				while (line != null)
+				{
+					message = message + line + ",";
+				}
 				//发送命令到服务器，命令长度较短，暂时没有考虑传输错误
-				string message = @"2016-09-25 08:00:00%2016-09-25 20:00:00%5%Arch\H4/PT001.Value,Arch\H4/PT002.Value,Arch\H4/PT003.Value";
+				message = @"2016-09-25 08:00:00%2016-09-25 20:00:00%3600%Arch\H4/PT001.Value,Arch\H4/PT002.Value,Arch\H4/PT003.Value";
 				//string zipString = Util.GZipCompressString(message);
 				byte[] data = Util.MakeMessage(message);
 				myClient.SyncSend(data);
